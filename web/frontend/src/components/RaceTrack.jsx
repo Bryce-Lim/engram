@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 // A deliberately simple live race: two tall vertical bars that fill from the
 // bottom as the agent completes calls. One dot per call — it lights up the
-// instant that call finishes. Precog's bar fills almost at once (the calls were
+// instant that call finishes. Engram's bar fills almost at once (the calls were
 // prefetched during the think); the baseline fills one dot at a time as each
 // call waits on the network. Whichever bar reaches the top first wins.
 //
@@ -23,16 +23,16 @@ export default function RaceTrack({ running, events, numCalls }) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [running])
 
-  const precog = deriveLane('precog', events)
+  const engram = deriveLane('engram', events)
   const baseline = deriveLane('baseline', events)
 
-  const bothDone = precog.doneMs != null && baseline.doneMs != null
+  const bothDone = engram.doneMs != null && baseline.doneMs != null
   const speedup =
-    bothDone && precog.doneMs > 0 ? baseline.doneMs / precog.doneMs : null
+    bothDone && engram.doneMs > 0 ? baseline.doneMs / engram.doneMs : null
 
   // Freeze the timer once both lanes are done.
   const elapsed = bothDone
-    ? Math.max(precog.doneMs, baseline.doneMs)
+    ? Math.max(engram.doneMs, baseline.doneMs)
     : clock
 
   return (
@@ -46,15 +46,15 @@ export default function RaceTrack({ running, events, numCalls }) {
 
       <div className="flex items-stretch justify-center gap-10">
         <Bar
-          label="With Precog"
+          label="With Engram"
           tone="cyan"
-          completed={precog.completed}
+          completed={engram.completed}
           total={numCalls}
-          doneMs={precog.doneMs}
+          doneMs={engram.doneMs}
           won={bothDone}
         />
         <Bar
-          label="Without Precog"
+          label="Without Engram"
           tone="warm"
           completed={baseline.completed}
           total={numCalls}
@@ -68,10 +68,10 @@ export default function RaceTrack({ running, events, numCalls }) {
           className="mt-7 text-center text-base font-light text-white/80"
           style={{ animation: 'fadein 0.6s ease both' }}
         >
-          Precog finished{' '}
+          Engram finished{' '}
           <span className="font-semibold text-cyan">{speedup.toFixed(2)}× faster</span>
           {' — '}
-          {Math.round(baseline.doneMs - precog.doneMs)} ms saved
+          {Math.round(baseline.doneMs - engram.doneMs)} ms saved
         </div>
       )}
     </div>
@@ -84,7 +84,7 @@ function Bar({ label, tone, completed, total, doneMs, won }) {
   const n = Math.max(total, 1)
   const fillPct = (Math.min(completed, n) / n) * 100
 
-  // Liquid tint: warm orange glass for Precog, cool white glass for baseline.
+  // Liquid tint: warm orange glass for Engram, cool white glass for baseline.
   const liquid = cyan
     ? {
         body: 'linear-gradient(180deg, rgba(255,157,60,0.78) 0%, rgba(255,140,40,0.42) 55%, rgba(255,120,20,0.30) 100%)',

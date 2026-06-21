@@ -1,6 +1,6 @@
 import unittest
 
-from precog.safety import ToolRegistry, is_speculatable
+from engram.safety import ToolRegistry, is_speculatable
 
 
 class TestToolRegistry(unittest.TestCase):

@@ -16,21 +16,21 @@ _ROOT = os.path.dirname(_HERE)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from demo.harness import (connect_baseline, close_baseline, connect_precog,  # noqa: E402
+from demo.harness import (connect_baseline, close_baseline, connect_engram,  # noqa: E402
                           demo_intent_rules)
 
 
 # Keep the simulated server fast for tests.
-os.environ.setdefault("PRECOG_DEMO_LATENCY", "0.15")
+os.environ.setdefault("ENGRAM_DEMO_LATENCY", "0.15")
 
 
 class TestProxyPassthrough(unittest.TestCase):
     def test_initialize_and_tools_list_passthrough(self):
-        handle = connect_precog(install_demo_rules=True)
+        handle = connect_engram(install_demo_rules=True)
         try:
             init = handle.driver.initialize()
             self.assertIn("result", init)
-            self.assertEqual(init["result"]["serverInfo"]["name"], "precog-demo-server")
+            self.assertEqual(init["result"]["serverInfo"]["name"], "engram-demo-server")
             tools = handle.driver.list_tools()
             names = {t["name"] for t in tools["result"]["tools"]}
             self.assertIn("get_orders", names)
@@ -39,7 +39,7 @@ class TestProxyPassthrough(unittest.TestCase):
             handle.close()
 
     def test_tool_call_correct_result(self):
-        handle = connect_precog(install_demo_rules=True)
+        handle = connect_engram(install_demo_rules=True)
         try:
             handle.driver.initialize()
             handle.driver.list_tools()
@@ -52,7 +52,7 @@ class TestProxyPassthrough(unittest.TestCase):
 
 class TestSpeculativeHit(unittest.TestCase):
     def test_cot_oracle_prewarms_call(self):
-        handle = connect_precog(install_demo_rules=True)
+        handle = connect_engram(install_demo_rules=True)
         try:
             handle.driver.initialize()
             handle.driver.list_tools()
@@ -68,14 +68,14 @@ class TestSpeculativeHit(unittest.TestCase):
             handle.close()
 
     def test_parallel_plan_yields_speedup(self):
-        latency = float(os.environ["PRECOG_DEMO_LATENCY"])
+        latency = float(os.environ["ENGRAM_DEMO_LATENCY"])
         plan = ("Plan: pull the orders for alice, get the profile for alice, "
                 "and fetch the invoice for ORD-1001.")
         scenario = [("get_orders", {"customer": "alice"}),
                     ("get_customer", {"customer": "alice"}),
                     ("fetch_invoice", {"order_id": "ORD-1001"})]
 
-        handle = connect_precog(install_demo_rules=True)
+        handle = connect_engram(install_demo_rules=True)
         try:
             handle.driver.initialize()
             handle.driver.list_tools()
@@ -97,7 +97,7 @@ class TestSpeculativeHit(unittest.TestCase):
 
 class TestSafetyEndToEnd(unittest.TestCase):
     def test_send_email_never_speculated(self):
-        handle = connect_precog(install_demo_rules=True)
+        handle = connect_engram(install_demo_rules=True)
         try:
             handle.driver.initialize()
             handle.driver.list_tools()
@@ -122,7 +122,7 @@ class TestSafetyEndToEnd(unittest.TestCase):
 
 class TestMarkovLearningEndToEnd(unittest.TestCase):
     def test_hit_rate_climbs_across_runs(self):
-        handle = connect_precog(install_demo_rules=False, markov_min_observations=1)
+        handle = connect_engram(install_demo_rules=False, markov_min_observations=1)
         chain = ["get_status", "get_metrics", "get_alerts"]
         try:
             handle.driver.initialize()
@@ -146,18 +146,18 @@ class TestMarkovLearningEndToEnd(unittest.TestCase):
 
 
 class TestCliEndToEnd(unittest.TestCase):
-    """Drive the *shipped* ``bin/precog wrap`` entry point as a subprocess."""
+    """Drive the *shipped* ``bin/engram wrap`` entry point as a subprocess."""
 
     def _spawn_cli(self, extra_args):
         import subprocess
-        cmd = [sys.executable, os.path.join(_ROOT, "bin", "precog"), "wrap", "--quiet"]
+        cmd = [sys.executable, os.path.join(_ROOT, "bin", "engram"), "wrap", "--quiet"]
         cmd += extra_args
         cmd += ["--", sys.executable, os.path.join(_ROOT, "demo", "mock_server.py")]
         return subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
     def _run(self, extra_args, reasoning, call):
-        from precog import jsonrpc
-        latency = float(os.environ["PRECOG_DEMO_LATENCY"])
+        from engram import jsonrpc
+        latency = float(os.environ["ENGRAM_DEMO_LATENCY"])
         proc = self._spawn_cli(extra_args)
         responses = {}
 
@@ -183,7 +183,7 @@ class TestCliEndToEnd(unittest.TestCase):
             deadline = time.monotonic() + 5
             while 2 not in responses and time.monotonic() < deadline:
                 time.sleep(0.01)
-            send(jsonrpc.make_notification("notifications/precog/reasoning",
+            send(jsonrpc.make_notification("notifications/engram/reasoning",
                                            {"text": reasoning}))
             time.sleep(latency + 0.1)  # think; prefetch overlaps and completes
             emit = time.monotonic()
@@ -230,8 +230,8 @@ class TestCliEndToEnd(unittest.TestCase):
 
 class TestProtocolEdgeCases(unittest.TestCase):
     def test_batch_request_gets_error_not_silence(self):
-        from precog import jsonrpc
-        handle = connect_precog(install_demo_rules=False)
+        from engram import jsonrpc
+        handle = connect_engram(install_demo_rules=False)
         try:
             handle.driver.initialize()
             # Send a raw top-level array (a batch) and expect a loud error.
@@ -252,8 +252,8 @@ class TestProtocolEdgeCases(unittest.TestCase):
             handle.close()
 
     def test_id_null_request_rejected(self):
-        from precog import jsonrpc
-        handle = connect_precog(install_demo_rules=False)
+        from engram import jsonrpc
+        handle = connect_engram(install_demo_rules=False)
         try:
             handle.driver.initialize()
             handle.driver._send({"jsonrpc": "2.0", "id": None, "method": "tools/list"})

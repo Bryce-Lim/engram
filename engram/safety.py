@@ -1,7 +1,7 @@
 """Safety by protocol: only speculate on side-effect-free tools.
 
 MCP lets a server annotate each tool with hints. The one that matters here is
-``readOnlyHint``: if true, the tool does not modify its environment. Precog
+``readOnlyHint``: if true, the tool does not modify its environment. Engram
 speculatively executes a tool call *before the model has committed to it*, so
 it MUST never speculate a tool that could send an email, charge a card, or
 otherwise mutate state. We treat ``readOnlyHint == true`` as the *only* license

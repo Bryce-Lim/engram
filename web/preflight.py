@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Precog demo preflight — one command to confirm everything works.
+"""Engram demo preflight — one command to confirm everything works.
 
 Run this the morning of the demo. It exercises the whole stack end-to-end and
 prints a clear PASS/FAIL per check, exiting non-zero if anything is wrong, so
@@ -47,8 +47,8 @@ def check(name, fn):
 
 
 def c1_imports():
-    import precog.proxy  # noqa
-    import precog.speculator  # noqa
+    import engram.proxy  # noqa
+    import engram.speculator  # noqa
     from web import compare, planner, stream, learning  # noqa
     return "engine + web modules import"
 
@@ -127,7 +127,7 @@ def c6_learning():
 
 
 def main():
-    print("\nPrecog preflight — verifying the full demo stack\n")
+    print("\nEngram preflight — verifying the full demo stack\n")
     check("core + web imports", c1_imports)
     check("planner robustness", c2_planner)
     check("UI is built", c3_ui_built)

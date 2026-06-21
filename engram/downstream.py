@@ -1,6 +1,6 @@
 """The downstream client — multiplexed MCP stdio connection to the tool server.
 
-Precog spawns the real MCP server as a subprocess and talks to it over the same
+Engram spawns the real MCP server as a subprocess and talks to it over the same
 stdio JSON-RPC framing an agent would use. The key requirement is *concurrency*:
 a real call and several speculative calls may all be in flight at once, so we
 cannot use a simple request/response loop. Instead a single reader thread
@@ -18,7 +18,7 @@ import sys
 import threading
 from typing import Any, Callable, Dict, List, Optional
 
-from precog import jsonrpc
+from engram import jsonrpc
 
 
 class Future:
@@ -60,7 +60,7 @@ class Future:
 class DownstreamClient:
     """Owns the server subprocess and a demultiplexing reader thread."""
 
-    def __init__(self, command: List[str], id_prefix: str = "precog-down-",
+    def __init__(self, command: List[str], id_prefix: str = "engram-down-",
                  on_log: Optional[Callable[[str], None]] = None,
                  max_line_bytes: int = 16 * 1024 * 1024):
         self.command = command
@@ -90,11 +90,11 @@ class DownstreamClient:
             stderr=subprocess.PIPE,
             bufsize=0,
         )
-        self._reader = threading.Thread(target=self._read_loop, name="precog-downstream-reader")
+        self._reader = threading.Thread(target=self._read_loop, name="engram-downstream-reader")
         self._reader.daemon = True
         self._reader.start()
         self._stderr_reader = threading.Thread(
-            target=self._drain_stderr, name="precog-downstream-stderr")
+            target=self._drain_stderr, name="engram-downstream-stderr")
         self._stderr_reader.daemon = True
         self._stderr_reader.start()
 

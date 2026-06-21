@@ -1,4 +1,4 @@
-"""Run a plan with and without Precog and return MEASURED timings.
+"""Run a plan with and without Engram and return MEASURED timings.
 
 This is the real comparison engine behind the web UI. Both runs talk to a real
 mock MCP server subprocess over real JSON-RPC; the only simulated quantities are
@@ -19,8 +19,8 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 from demo.harness import (close_baseline, connect_baseline,  # noqa: E402
-                          connect_precog)
-from precog.predictors.cot_oracle import IntentRule  # noqa: E402
+                          connect_engram)
+from engram.predictors.cot_oracle import IntentRule  # noqa: E402
 
 
 def _build_rules(rule_dicts: List[Dict[str, Any]]) -> List[IntentRule]:
@@ -39,18 +39,18 @@ def _build_rules(rule_dicts: List[Dict[str, Any]]) -> List[IntentRule]:
 def run_comparison(plan: Dict[str, Any], latency: float = 0.4,
                    think: float = 1.0) -> Dict[str, Any]:
     """Execute ``plan`` both ways and return timings + per-call detail."""
-    os.environ["PRECOG_DEMO_LATENCY"] = str(latency)
+    os.environ["ENGRAM_DEMO_LATENCY"] = str(latency)
     reasoning = plan.get("reasoning", "")
     calls = plan.get("calls", [])
     rules = _build_rules(plan.get("rules", []))
 
-    # ---- WITH Precog --------------------------------------------------
-    handle = connect_precog(install_demo_rules=False)
+    # ---- WITH Engram --------------------------------------------------
+    handle = connect_engram(install_demo_rules=False)
     if rules and handle.proxy.cot is not None:
         for r in rules:
             handle.proxy.cot.add_rule(r)
     per_call = []  # type: List[Dict[str, Any]]
-    precog_total = 0.0
+    engram_total = 0.0
     try:
         handle.driver.initialize()
         tools = handle.driver.list_tools()["result"]["tools"]
@@ -80,12 +80,12 @@ def run_comparison(plan: Dict[str, Any], latency: float = 0.4,
                 "read_only": name in readonly,
                 "result": text,
             })
-        precog_total = (time.monotonic() - start) * 1000.0
+        engram_total = (time.monotonic() - start) * 1000.0
         metrics = handle.proxy.metrics.as_dict()
     finally:
         handle.close()
 
-    # ---- WITHOUT Precog (serial baseline) -----------------------------
+    # ---- WITHOUT Engram (serial baseline) -----------------------------
     driver, proc = connect_baseline()
     baseline_total = 0.0
     try:
@@ -101,15 +101,15 @@ def run_comparison(plan: Dict[str, Any], latency: float = 0.4,
         close_baseline(proc)
 
     hits = sum(1 for c in per_call if c["outcome"] == "hit")
-    speedup = (baseline_total / precog_total) if precog_total > 0 else 0.0
+    speedup = (baseline_total / engram_total) if engram_total > 0 else 0.0
 
     return {
         "reasoning": reasoning,
         "latency_ms": round(latency * 1000),
         "think_ms": round(think * 1000),
         "baseline_total_ms": round(baseline_total, 1),
-        "precog_total_ms": round(precog_total, 1),
-        "saved_ms": round(baseline_total - precog_total, 1),
+        "engram_total_ms": round(engram_total, 1),
+        "saved_ms": round(baseline_total - engram_total, 1),
         "speedup": round(speedup, 2),
         "num_calls": len(calls),
         "hits": hits,

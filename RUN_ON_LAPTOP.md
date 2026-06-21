@@ -1,14 +1,14 @@
-# Running Precog on your laptop
+# Running Engram on your laptop
 
-This archive contains the full Precog project. The web UI's frontend is
+This archive contains the full Engram project. The web UI's frontend is
 **already built** (in `web/static/`), so you can run everything with just
 Python 3 — no Node, no build step.
 
 ## 1. Unpack
 
 ```bash
-tar -xzf precog.tar.gz
-cd precog
+tar -xzf engram.tar.gz
+cd engram
 ```
 
 ## 2. Run the test suite (pure Python stdlib)
@@ -22,7 +22,7 @@ python3 -m unittest discover -s tests       # 83 tests
 
 ```bash
 python3 demo/run_demo.py
-PRECOG_DEMO_LATENCY=1.0 python3 demo/run_demo.py   # exaggerate the I/O cost
+ENGRAM_DEMO_LATENCY=1.0 python3 demo/run_demo.py   # exaggerate the I/O cost
 ```
 
 ## 4. Run the web UI (the live race in a browser)
@@ -53,13 +53,13 @@ npm run build      # emits to ../static
 ## Wrap a real MCP server (the actual product)
 
 ```bash
-bin/precog wrap -- ./your-mcp-server --args
-bin/precog wrap --rules demo/rules.example.json -- ./your-mcp-server
+bin/engram wrap -- ./your-mcp-server --args
+bin/engram wrap --rules demo/rules.example.json -- ./your-mcp-server
 ```
 
 ## Layout
 
-- `precog/`        — the proxy engine (jsonrpc, downstream, speculator, predictors, safety)
+- `engram/`        — the proxy engine (jsonrpc, downstream, speculator, predictors, safety)
 - `demo/`          — mock MCP server, scripted agent, CLI demo, prompt tester
 - `tests/`         — 83 unittest tests
 - `web/`           — Python server + planner + comparison/stream + React frontend

@@ -1,23 +1,23 @@
 import NumberTicker from './NumberTicker'
 
-// Two glass cards racing side by side. The "With Precog" card carries the cyan
+// Two glass cards racing side by side. The "With Engram" card carries the cyan
 // shader accent; the baseline stays muted white. Bars fill proportional to time
 // (longest = 100%), animated from zero so the gap is felt, not just read.
 export default function ComparisonCards({ data }) {
-  const max = Math.max(data.baseline_total_ms, data.precog_total_ms, 1)
+  const max = Math.max(data.baseline_total_ms, data.engram_total_ms, 1)
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card
-        title="Without Precog"
+        title="Without Engram"
         ms={data.baseline_total_ms}
         pct={(data.baseline_total_ms / max) * 100}
         tone="warm"
         delay={0}
       />
       <Card
-        title="With Precog"
-        ms={data.precog_total_ms}
-        pct={(data.precog_total_ms / max) * 100}
+        title="With Engram"
+        ms={data.engram_total_ms}
+        pct={(data.engram_total_ms / max) * 100}
         tone="cyan"
         delay={120}
       />

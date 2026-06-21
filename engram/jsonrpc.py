@@ -79,7 +79,7 @@ def encode(msg: Dict[str, Any]) -> bytes:
 class BatchNotSupported(ValueError):
     """Raised when a top-level JSON array (a JSON-RPC batch) is received.
 
-    Precog forwards messages one at a time and does not implement batching; a
+    Engram forwards messages one at a time and does not implement batching; a
     distinct type lets the proxy answer with a precise error instead of
     silently dropping the request (which would hang the client).
     """

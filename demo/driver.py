@@ -1,7 +1,7 @@
 """A scripted MCP client (a stand-in agent) used to drive the demo and tests.
 
 It speaks MCP stdio over any byte streams: in the demo we point it at an
-in-process Precog proxy (for the speculative path) or directly at the mock
+in-process Engram proxy (for the speculative path) or directly at the mock
 server subprocess (for the baseline). A background reader thread demultiplexes
 responses by JSON-RPC id, so calls can be issued and awaited synchronously.
 """
@@ -10,8 +10,8 @@ import itertools
 import threading
 from typing import Any, Dict, Optional
 
-from precog import jsonrpc
-from precog.proxy import REASONING_METHOD, TOOL_INTENT_METHOD
+from engram import jsonrpc
+from engram.proxy import REASONING_METHOD, TOOL_INTENT_METHOD
 
 
 class AgentDriver:
@@ -75,7 +75,7 @@ class AgentDriver:
         resp = self.request("initialize", {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
-            "clientInfo": {"name": "precog-demo-agent", "version": "0.1.0"},
+            "clientInfo": {"name": "engram-demo-agent", "version": "0.1.0"},
         })
         self.notify("notifications/initialized")
         return resp

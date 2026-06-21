@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Test Precog's prediction on YOUR reasoning text and tool calls.
+"""Test Engram's prediction on YOUR reasoning text and tool calls.
 
 This is a playground: you provide the model's reasoning (what it "narrates"
 while thinking) and the tool call(s) the agent then makes. The script streams
-your reasoning to an in-process Precog, waits a configurable "think" interval
-(during which Precog prefetches), fires your call(s), and reports for each one
+your reasoning to an in-process Engram, waits a configurable "think" interval
+(during which Engram prefetches), fires your call(s), and reports for each one
 whether it was served warm (a hit) or had to execute fresh (a miss) — with
 timings — plus the final metrics.
 
@@ -49,19 +49,19 @@ _ROOT = os.path.dirname(_HERE)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from demo.harness import connect_baseline, close_baseline, connect_precog  # noqa: E402
-from precog.config import ConfigError, load_intent_rules  # noqa: E402
-from precog.predictors.cot_oracle import IntentRule  # noqa: E402
+from demo.harness import connect_baseline, close_baseline, connect_engram  # noqa: E402
+from engram.config import ConfigError, load_intent_rules  # noqa: E402
+from engram.predictors.cot_oracle import IntentRule  # noqa: E402
 
 
 def _parse_args(argv):
     p = argparse.ArgumentParser(
         prog="try_prompt",
-        description="Test Precog prediction on your own reasoning + tool calls.",
+        description="Test Engram prediction on your own reasoning + tool calls.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__)
     p.add_argument("--reasoning", default="",
-                   help="the model's reasoning text (streamed to Precog before the calls)")
+                   help="the model's reasoning text (streamed to Engram before the calls)")
     p.add_argument("--call", action="append", nargs="+", metavar=("NAME", "ARGS_JSON"),
                    default=[], help="a tool call: NAME [JSON-args]. Repeatable, in order.")
     p.add_argument("--rules", metavar="FILE",
@@ -69,14 +69,14 @@ def _parse_args(argv):
     p.add_argument("--scenario", metavar="FILE",
                    help="JSON file with {reasoning, calls:[{name,arguments}], rules?}")
     p.add_argument("--latency", type=float,
-                   default=float(os.environ.get("PRECOG_DEMO_LATENCY", "0.4")),
+                   default=float(os.environ.get("ENGRAM_DEMO_LATENCY", "0.4")),
                    help="simulated per-tool server latency, seconds (default 0.4)")
     p.add_argument("--think", type=float,
-                   default=float(os.environ.get("PRECOG_DEMO_THINK", "0.6")),
+                   default=float(os.environ.get("ENGRAM_DEMO_THINK", "0.6")),
                    help="seconds to 'think' after reasoning before firing calls")
-    p.add_argument("--log", action="store_true", help="show Precog's internal log on stderr")
+    p.add_argument("--log", action="store_true", help="show Engram's internal log on stderr")
     p.add_argument("--compare", action="store_true",
-                   help="also run the same scenario WITHOUT Precog and compare total wall-clock")
+                   help="also run the same scenario WITHOUT Engram and compare total wall-clock")
     return p.parse_args(argv)
 
 
@@ -118,8 +118,8 @@ def _load_scenario(args):
 def main(argv=None):
     args = _parse_args(argv)
 
-    # The mock server reads PRECOG_DEMO_LATENCY at spawn time.
-    os.environ["PRECOG_DEMO_LATENCY"] = str(args.latency)
+    # The mock server reads ENGRAM_DEMO_LATENCY at spawn time.
+    os.environ["ENGRAM_DEMO_LATENCY"] = str(args.latency)
 
     try:
         reasoning, calls, rules = _load_scenario(args)
@@ -133,9 +133,9 @@ def main(argv=None):
 
     def log(m):
         if args.log:
-            sys.stderr.write("[precog] " + m + "\n")
+            sys.stderr.write("[engram] " + m + "\n")
 
-    handle = connect_precog(on_log=log, install_demo_rules=False)
+    handle = connect_engram(on_log=log, install_demo_rules=False)
     # Install the user's rules into the live oracle.
     if rules and handle.proxy.cot is not None:
         for r in rules:
@@ -151,7 +151,7 @@ def main(argv=None):
         time.sleep(0.05)  # let the registry populate
 
         print("=" * 64)
-        print("Precog prompt test")
+        print("Engram prompt test")
         print("=" * 64)
         print("server latency : %.0f ms/call    think: %.0f ms" %
               (args.latency * 1000, args.think * 1000))
@@ -165,9 +165,9 @@ def main(argv=None):
                 print("  ! '%s' is not a tool on the mock server (known: %s)"
                       % (name, ", ".join(sorted(known))))
 
-        # Wall-clock starts when the model begins thinking. With Precog, the
+        # Wall-clock starts when the model begins thinking. With Engram, the
         # prefetch overlaps the think; the timer covers think + all calls.
-        precog_start = time.monotonic()
+        engram_start = time.monotonic()
         if reasoning:
             driver.send_reasoning(reasoning)
         if args.think > 0:
@@ -191,7 +191,7 @@ def main(argv=None):
                   % (verdict, name, dt, _short(arguments), note))
             if text:
                 print("            -> %s" % text)
-        precog_total = time.monotonic() - precog_start
+        engram_total = time.monotonic() - engram_start
 
         m = handle.proxy.metrics.as_dict()
         print()
@@ -206,7 +206,7 @@ def main(argv=None):
     if not args.compare:
         return 0
 
-    # -- Baseline: same scenario, same think time, but NO Precog. ----------
+    # -- Baseline: same scenario, same think time, but NO Engram. ----------
     baseline_total = _run_baseline(reasoning, calls, args.think)
 
     print()
@@ -214,19 +214,19 @@ def main(argv=None):
     print("Total wall-clock — same %d-call scenario, same %.0f ms think" %
           (len(calls), args.think * 1000))
     print("=" * 64)
-    print("  WITHOUT precog (serial) : %7.0f ms   think, then each call waits"
+    print("  WITHOUT engram (serial) : %7.0f ms   think, then each call waits"
           % (baseline_total * 1000))
-    print("  WITH precog             : %7.0f ms   calls prefetched during the think"
-          % (precog_total * 1000))
-    if precog_total > 0:
+    print("  WITH engram             : %7.0f ms   calls prefetched during the think"
+          % (engram_total * 1000))
+    if engram_total > 0:
         print()
-        print("  speedup                 : %.2fx end-to-end" % (baseline_total / precog_total))
-        print("  time saved              : %7.0f ms" % ((baseline_total - precog_total) * 1000))
+        print("  speedup                 : %.2fx end-to-end" % (baseline_total / engram_total))
+        print("  time saved              : %7.0f ms" % ((baseline_total - engram_total) * 1000))
     return 0
 
 
 def _run_baseline(reasoning, calls, think):
-    """Run the same calls straight against the server with no Precog.
+    """Run the same calls straight against the server with no Engram.
 
     The think time is still paid (the model reasons either way), but here the
     server sits idle through it and every call pays full latency in series.
@@ -236,7 +236,7 @@ def _run_baseline(reasoning, calls, think):
         driver.initialize()
         driver.list_tools()
         start = time.monotonic()
-        # The reasoning has nowhere to go without Precog; the think is just dead
+        # The reasoning has nowhere to go without Engram; the think is just dead
         # time during which the downstream API is idle.
         if think > 0:
             time.sleep(think)

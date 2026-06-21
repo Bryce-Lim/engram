@@ -25,8 +25,8 @@ correctness cost.
 import re
 from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple
 
-from precog.predictors.base import Prediction, Predictor
-from precog.safety import ToolRegistry
+from engram.predictors.base import Prediction, Predictor
+from engram.safety import ToolRegistry
 
 # Tokens too generic to be useful triggers on their own.
 _STOPWORDS = frozenset([

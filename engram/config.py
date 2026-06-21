@@ -1,8 +1,8 @@
-"""Optional configuration for the Precog CLI.
+"""Optional configuration for the Engram CLI.
 
 A rules file lets an operator teach the chain-of-thought oracle explicit
 intent→tool mappings with argument capture — the same mechanism the demo wires
-up in code, but data-driven so ``precog wrap`` can use it with no code. The file
+up in code, but data-driven so ``engram wrap`` can use it with no code. The file
 is JSON::
 
     {
@@ -33,7 +33,7 @@ import json
 import re
 from typing import List
 
-from precog.predictors.cot_oracle import IntentRule
+from engram.predictors.cot_oracle import IntentRule
 
 _FLAG_MAP = {
     "i": re.IGNORECASE,

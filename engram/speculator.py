@@ -1,11 +1,11 @@
 """The speculation engine — where prediction, safety, and dispatch meet.
 
-The speculator is the heart of Precog. It:
+The speculator is the heart of Engram. It:
 
-1. takes :class:`~precog.predictors.base.Prediction` objects from the predictors,
+1. takes :class:`~engram.predictors.base.Prediction` objects from the predictors,
 2. drops any whose tool is not read-only (the safety gate — a hard correctness
    boundary; nothing speculative is dispatched without passing it),
-3. reserves a :class:`~precog.cache.Speculation` slot per unique signature so a
+3. reserves a :class:`~engram.cache.Speculation` slot per unique signature so a
    given call is fired downstream at most once, and
 4. dispatches the downstream ``tools/call`` on a worker thread so many
    speculations overlap.
@@ -26,11 +26,11 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from precog import jsonrpc
-from precog.cache import SpeculationCache, Speculation, canonical_signature
-from precog.metrics import Metrics
-from precog.predictors.base import Prediction
-from precog.safety import ToolRegistry, is_speculatable
+from engram import jsonrpc
+from engram.cache import SpeculationCache, Speculation, canonical_signature
+from engram.metrics import Metrics
+from engram.predictors.base import Prediction
+from engram.safety import ToolRegistry, is_speculatable
 
 
 class Speculator:
@@ -61,7 +61,7 @@ class Speculator:
         self._dispatch = dispatch
         self.warm_ttl = warm_ttl
         self._pool = ThreadPoolExecutor(max_workers=max_workers,
-                                        thread_name_prefix="precog-spec")
+                                        thread_name_prefix="engram-spec")
         self._on_log = on_log or (lambda m: None)
 
     def _serveable(self, spec: Speculation) -> bool:

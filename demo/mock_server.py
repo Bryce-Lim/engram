@@ -4,7 +4,7 @@
 It speaks the same newline-delimited JSON-RPC framing as a production MCP
 server and implements ``initialize``, ``tools/list``, and ``tools/call``. Each
 tool sleeps for a configurable latency to stand in for real network/API I/O —
-this is the cost Precog hides by prefetching during the model's think time.
+this is the cost Engram hides by prefetching during the model's think time.
 
 Tools (the ``readOnlyHint`` annotation is what gates speculation):
 
@@ -12,10 +12,10 @@ Tools (the ``readOnlyHint`` annotation is what gates speculation):
 * ``get_orders``    (read-only)  — list a customer's recent orders
 * ``get_customer``  (read-only)  — fetch a customer profile
 * ``fetch_invoice`` (read-only)  — fetch an invoice document
-* ``send_email``    (NOT read-only) — a side-effecting tool; Precog must never
+* ``send_email``    (NOT read-only) — a side-effecting tool; Engram must never
   speculate it.
 
-Latency is controlled by the ``PRECOG_DEMO_LATENCY`` env var (seconds, float).
+Latency is controlled by the ``ENGRAM_DEMO_LATENCY`` env var (seconds, float).
 """
 
 import os
@@ -29,9 +29,9 @@ _ROOT = os.path.dirname(_HERE)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from precog import jsonrpc  # noqa: E402
+from engram import jsonrpc  # noqa: E402
 
-LATENCY = float(os.environ.get("PRECOG_DEMO_LATENCY", "0.4"))
+LATENCY = float(os.environ.get("ENGRAM_DEMO_LATENCY", "0.4"))
 
 TOOLS = [
     {
@@ -242,7 +242,7 @@ def _handle(msg):
         return jsonrpc.make_result(msg_id, {
             "protocolVersion": "2024-11-05",
             "capabilities": {"tools": {}},
-            "serverInfo": {"name": "precog-demo-server", "version": "0.1.0"},
+            "serverInfo": {"name": "engram-demo-server", "version": "0.1.0"},
         })
     if method == "tools/list":
         return jsonrpc.make_result(msg_id, {"tools": TOOLS})

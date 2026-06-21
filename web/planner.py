@@ -1,7 +1,7 @@
 """Turn a free-text prompt into an agent plan (reasoning + tool calls).
 
 This is a DETERMINISTIC stand-in for a real LLM: in production the model's
-reasoning stream and tool calls drive Precog, but there is no live model in this
+reasoning stream and tool calls drive Engram, but there is no live model in this
 environment. The planner inspects the prompt for entities (customer names, order
 ids, SKUs, intent keywords) and emits:
 
@@ -11,7 +11,7 @@ ids, SKUs, intent keywords) and emits:
   * ``rules`` — the intent rules the oracle uses to predict those calls.
 
 The IMPORTANT honesty point: the planner only decides *what calls happen*. The
-with/without-Precog timings measured downstream are real — the planner does not
+with/without-Engram timings measured downstream are real — the planner does not
 fabricate any speedup.
 
 Design goals (demo robustness):

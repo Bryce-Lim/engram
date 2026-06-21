@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-// Exact WebGL background from the Precog design: radiating concentric cyan
+// Exact WebGL background from the Engram design: radiating concentric cyan
 // "interference" lines, animated. The fragment shader is ported verbatim from
 // the source so the hero looks identical. `intensity` lets us reuse the same
 // field, dimmed, behind the comparison view without it competing with content.

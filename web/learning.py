@@ -1,6 +1,6 @@
 """Process-level cross-run learning store for the web demo.
 
-Each web request builds a fresh in-process Precog. On its own, the Markov
+Each web request builds a fresh in-process Engram. On its own, the Markov
 sequence model would start empty every time, so the "it gets smarter as it
 learns" story would never show in the UI. This module persists a Markov
 transition table *across requests*, keyed by a normalized scenario signature

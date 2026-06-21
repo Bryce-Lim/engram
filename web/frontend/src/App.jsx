@@ -129,7 +129,7 @@ export default function App() {
         {/* logo */}
         <div className="absolute left-8 top-7 z-[3] flex items-center gap-[9px]">
           <span className="text-[21px] font-light tracking-[-0.01em] text-white">
-            Precog
+            Engram
           </span>
         </div>
 
@@ -169,7 +169,7 @@ export default function App() {
 
           {!started && (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[13px] font-light text-white/30">
-              Enter a prompt to race it — with and without Precog.
+              Enter a prompt to race it — with and without Engram.
             </div>
           )}
         </div>

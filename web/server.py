@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Precog web server — serves the built frontend and the live comparison API.
+"""Engram web server — serves the built frontend and the live comparison API.
 
 Endpoints:
   GET  /                 -> the built React app (web/static/)
@@ -30,7 +30,7 @@ from web.planner import plan as build_plan  # noqa: E402
 from web.stream import stream_comparison  # noqa: E402
 from web import learning  # noqa: E402
 
-# A comparison run mutates a process-wide env var (PRECOG_DEMO_LATENCY) that the
+# A comparison run mutates a process-wide env var (ENGRAM_DEMO_LATENCY) that the
 # mock server reads at call time, so concurrent runs would race on latency.
 # Serialize comparison runs behind one lock; the UI is single-user anyway, and
 # this guarantees clean, reproducible numbers during a live demo.
@@ -51,7 +51,7 @@ _CONTENT_TYPES = {
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "PrecogWeb/0.1"
+    server_version = "EngramWeb/0.1"
 
     def _send(self, code, body, content_type="application/json"):
         if isinstance(body, (dict, list)):
@@ -195,7 +195,7 @@ class Handler(BaseHTTPRequestHandler):
                     200,
                     "<!doctype html><meta charset=utf-8>"
                     "<body style='font-family:sans-serif;max-width:40rem;margin:4rem auto'>"
-                    "<h1>Precog web — not built yet</h1>"
+                    "<h1>Engram web — not built yet</h1>"
                     "<p>Build the frontend first:</p>"
                     "<pre>cd web/frontend &amp;&amp; npm install &amp;&amp; npm run build</pre>"
                     "<p>Then restart this server. The API at "
@@ -209,12 +209,12 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Precog web server")
+    parser = argparse.ArgumentParser(description="Engram web server")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--host", default="127.0.0.1")
     args = parser.parse_args(argv)
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
-    sys.stderr.write("[web] Precog UI on http://%s:%d  (Ctrl-C to stop)\n"
+    sys.stderr.write("[web] Engram UI on http://%s:%d  (Ctrl-C to stop)\n"
                      % (args.host, args.port))
     try:
         httpd.serve_forever()

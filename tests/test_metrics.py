@@ -1,6 +1,6 @@
 import unittest
 
-from precog.metrics import Metrics
+from engram.metrics import Metrics
 
 
 class TestMetrics(unittest.TestCase):

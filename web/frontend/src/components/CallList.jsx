@@ -1,4 +1,4 @@
-// Per-call breakdown: each call in order, its served time, and whether Precog
+// Per-call breakdown: each call in order, its served time, and whether Engram
 // served it warm or it ran fresh — shown as plain text (no pills). Side-effecting
 // tools are noted as never speculated. Glass surface, cyan = warm.
 export default function CallList({ calls, latencyMs }) {

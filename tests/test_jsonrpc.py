@@ -1,6 +1,6 @@
 import unittest
 
-from precog import jsonrpc
+from engram import jsonrpc
 
 
 class TestJsonRpc(unittest.TestCase):

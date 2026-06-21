@@ -1,11 +1,11 @@
-"""The Precog proxy — drop-in MCP middleware.
+"""The Engram proxy — drop-in MCP middleware.
 
 Topology::
 
-    agent / host  <-- stdio JSON-RPC -->  Precog  <-- stdio JSON-RPC -->  MCP server
+    agent / host  <-- stdio JSON-RPC -->  Engram  <-- stdio JSON-RPC -->  MCP server
        (upstream)                        (this)                          (downstream)
 
-Precog speaks the MCP stdio framing on both sides. To the agent it *is* the
+Engram speaks the MCP stdio framing on both sides. To the agent it *is* the
 server; to the server it *is* the client. It forwards everything faithfully,
 with three pieces of intelligence layered on:
 
@@ -18,8 +18,8 @@ with three pieces of intelligence layered on:
 * It accepts an optional *hint channel* — custom notifications a host MAY send
   to unlock the chain-of-thought oracle and eager dispatch:
 
-    - ``notifications/precog/reasoning``  params ``{"text": "..."}``
-    - ``notifications/precog/tool_intent`` params ``{"name": ..., "arguments": {...}}``
+    - ``notifications/engram/reasoning``  params ``{"text": "..."}``
+    - ``notifications/engram/tool_intent`` params ``{"name": ..., "arguments": {...}}``
 
   A host that sends nothing still gets Markov + protocol-safe concurrency with
   zero code changes; a host that forwards its thinking stream additionally gets
@@ -34,20 +34,20 @@ import threading
 import time
 from typing import Any, Callable, Dict, List, Optional
 
-from precog import jsonrpc
-from precog.cache import SpeculationCache
-from precog.downstream import DownstreamClient
-from precog.metrics import Metrics
-from precog.predictors import CoTOracle, EagerDispatch, MarkovModel
-from precog.predictors.base import Prediction, Predictor
-from precog.safety import ToolRegistry
-from precog.speculator import Speculator
+from engram import jsonrpc
+from engram.cache import SpeculationCache
+from engram.downstream import DownstreamClient
+from engram.metrics import Metrics
+from engram.predictors import CoTOracle, EagerDispatch, MarkovModel
+from engram.predictors.base import Prediction, Predictor
+from engram.safety import ToolRegistry
+from engram.speculator import Speculator
 
-REASONING_METHOD = "notifications/precog/reasoning"
-TOOL_INTENT_METHOD = "notifications/precog/tool_intent"
+REASONING_METHOD = "notifications/engram/reasoning"
+TOOL_INTENT_METHOD = "notifications/engram/tool_intent"
 
 
-class Precog:
+class Engram:
     """Orchestrates upstream I/O, downstream dispatch, and speculation."""
 
     def __init__(self, downstream_command: List[str],
@@ -259,7 +259,7 @@ class Precog:
             else:
                 self._write_upstream(jsonrpc.make_result(upstream_id, fut.value))
 
-        self._spawn(relay, "precog-relay")
+        self._spawn(relay, "engram-relay")
 
     def _handle_tools_list(self, msg: Dict[str, Any]) -> None:
         upstream_id = msg["id"]
@@ -283,7 +283,7 @@ class Precog:
                                 if (t.get("annotations") or {}).get("readOnlyHint") is True)))
             self._write_upstream(jsonrpc.make_result(upstream_id, result))
 
-        self._spawn(relay, "precog-toolslist")
+        self._spawn(relay, "engram-toolslist")
 
     def _handle_tools_call(self, msg: Dict[str, Any]) -> None:
         upstream_id = msg["id"]
@@ -312,7 +312,7 @@ class Precog:
             else:
                 self._write_upstream(jsonrpc.make_result(upstream_id, result))
 
-        self._spawn(serve, "precog-toolscall")
+        self._spawn(serve, "engram-toolscall")
 
     def _observe_and_predict(self, tool_name: str, arguments: Dict[str, Any],
                              error: Optional[Dict[str, Any]] = None) -> None:
@@ -339,7 +339,7 @@ class Precog:
     def serve_forever(self) -> None:
         """Start the downstream server and pump upstream messages until EOF."""
         self.downstream.start()
-        self._log("precog up: downstream=%s" % " ".join(self.downstream.command))
+        self._log("engram up: downstream=%s" % " ".join(self.downstream.command))
         try:
             for raw in iter(self._in.readline, b""):
                 if self._stopped.is_set():
@@ -354,7 +354,7 @@ class Precog:
                     self._log("upstream batch rejected: %s" % exc)
                     self._write_upstream(jsonrpc.make_error(
                         None, jsonrpc.INVALID_REQUEST,
-                        "JSON-RPC batch requests are not supported by precog"))
+                        "JSON-RPC batch requests are not supported by engram"))
                     continue
                 except ValueError as exc:
                     self._log("upstream decode error: %s" % exc)
@@ -377,4 +377,4 @@ class Precog:
         self._stopped.set()
         self.speculator.shutdown()
         self.downstream.close()
-        self._log("precog metrics: %s" % self.metrics.as_dict())
+        self._log("engram metrics: %s" % self.metrics.as_dict())

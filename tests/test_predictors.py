@@ -1,11 +1,11 @@
 import re
 import unittest
 
-from precog.predictors.base import Prediction
-from precog.predictors.cot_oracle import CoTOracle, IntentRule
-from precog.predictors.eager import EagerDispatch
-from precog.predictors.markov import MarkovModel
-from precog.safety import ToolRegistry
+from engram.predictors.base import Prediction
+from engram.predictors.cot_oracle import CoTOracle, IntentRule
+from engram.predictors.eager import EagerDispatch
+from engram.predictors.markov import MarkovModel
+from engram.safety import ToolRegistry
 
 
 class TestEager(unittest.TestCase):

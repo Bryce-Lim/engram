@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from precog.config import ConfigError, load_intent_rules
+from engram.config import ConfigError, load_intent_rules
 
 
 class TestConfig(unittest.TestCase):
@@ -55,7 +55,7 @@ class TestConfig(unittest.TestCase):
 
     def test_missing_file_reported(self):
         with self.assertRaises(ConfigError):
-            load_intent_rules("/nonexistent/precog-rules.json")
+            load_intent_rules("/nonexistent/engram-rules.json")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Executable entry point for the Precog CLI.
+"""Executable entry point for the Engram CLI.
 
-Adds the project root to sys.path so ``precog`` runs from a checkout without
-installation, then delegates to :func:`precog.cli.main`.
+Adds the project root to sys.path so ``engram`` runs from a checkout without
+installation, then delegates to :func:`engram.cli.main`.
 """
 
 import os
@@ -13,7 +13,7 @@ _ROOT = os.path.dirname(_HERE)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from precog.cli import main  # noqa: E402
+from engram.cli import main  # noqa: E402
 
 if __name__ == "__main__":
     sys.exit(main())

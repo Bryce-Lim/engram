@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Precog demo — race the same agent with and without speculative execution.
+"""Engram demo — race the same agent with and without speculative execution.
 
 Everything printed here is *measured* at runtime against a real MCP server
-subprocess; no number is hardcoded. The mock server sleeps ``PRECOG_DEMO_LATENCY``
+subprocess; no number is hardcoded. The mock server sleeps ``ENGRAM_DEMO_LATENCY``
 seconds per tool call to stand in for real API/network I/O, and the simulated
 agent "thinks" for a short while before each call (streaming its reasoning to
-the proxy). Precog uses that think time to prefetch.
+the proxy). Engram uses that think time to prefetch.
 
 Run::
 
     python3 demo/run_demo.py
-    PRECOG_DEMO_LATENCY=0.6 python3 demo/run_demo.py   # exaggerate the I/O cost
+    ENGRAM_DEMO_LATENCY=0.6 python3 demo/run_demo.py   # exaggerate the I/O cost
 """
 
 import os
@@ -22,14 +22,14 @@ _ROOT = os.path.dirname(_HERE)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from demo.harness import close_baseline, connect_baseline, connect_precog  # noqa: E402
+from demo.harness import close_baseline, connect_baseline, connect_engram  # noqa: E402
 
-LATENCY = float(os.environ.get("PRECOG_DEMO_LATENCY", "0.4"))
-THINK = float(os.environ.get("PRECOG_DEMO_THINK", "0.5"))
+LATENCY = float(os.environ.get("ENGRAM_DEMO_LATENCY", "0.4"))
+THINK = float(os.environ.get("ENGRAM_DEMO_THINK", "0.5"))
 
 # The model narrates its whole plan up front — naming three independent
 # lookups — then emits the calls one after another. A serial agent pays the I/O
-# latency three times (once per call). Precog reads the plan during the single
+# latency three times (once per call). Engram reads the plan during the single
 # think, fires all three read-only calls in parallel, and serves each warm when
 # the model finally emits it: the three round trips collapse into one. This is
 # the "A/B/C prefetch in parallel" mechanism from the pitch, and it's why the
@@ -69,13 +69,13 @@ def run_baseline():
         close_baseline(proc)
 
 
-def run_precog():
+def run_engram():
     """Speculative agent: reasoning streams during the think, calls return warm."""
-    handle = connect_precog(install_demo_rules=True)
+    handle = connect_engram(install_demo_rules=True)
     driver = handle.driver
     try:
         driver.initialize()
-        driver.list_tools()                   # lets Precog learn read-only hints
+        driver.list_tools()                   # lets Engram learn read-only hints
         # Give the proxy a beat to ingest tools/list before we speculate.
         time.sleep(0.05)
         start = time.monotonic()
@@ -92,7 +92,7 @@ def run_precog():
 
 def run_learning():
     """Run an argument-free chain three times; watch the Markov hit rate climb."""
-    handle = connect_precog(install_demo_rules=False, markov_min_observations=1)
+    handle = connect_engram(install_demo_rules=False, markov_min_observations=1)
     driver = handle.driver
     per_run = []
     try:
@@ -118,17 +118,17 @@ def run_squash():
     """Drive a misprediction and show it is squashed at no correctness cost.
 
     The model narrates intent for one tool but then calls a *different*
-    read-only tool. Precog speculates the predicted call, the real call misses,
+    read-only tool. Engram speculates the predicted call, the real call misses,
     the wrong speculation is squashed, and the agent still gets the right
     answer. Returns (served_result_text, metrics).
     """
-    handle = connect_precog(install_demo_rules=True)
+    handle = connect_engram(install_demo_rules=True)
     driver = handle.driver
     try:
         driver.initialize()
         driver.list_tools()
         time.sleep(0.05)
-        # Narrate "orders for alice" (Precog prefetches get_orders)...
+        # Narrate "orders for alice" (Engram prefetches get_orders)...
         driver.send_reasoning("I'll pull the orders for alice.")
         time.sleep(THINK)
         # ...but actually call a different tool. The speculation is wrong.
@@ -144,22 +144,22 @@ def run_squash():
 
 
 def main():
-    print("Precog demo — speculative execution for MCP")
+    print("Engram demo — speculative execution for MCP")
     print("downstream tool latency: %.0f ms   |   model think time: %.0f ms/step"
           % (LATENCY * 1000, THINK * 1000))
 
-    _hr("Race 1 — same 3-step agent, with and without Precog")
+    _hr("Race 1 — same 3-step agent, with and without Engram")
     print("(the chain-of-thought oracle here uses curated intent rules that")
     print(" capture the customer/order arguments from the narrated plan)")
     baseline = run_baseline()
-    precog_elapsed, metrics = run_precog()
+    engram_elapsed, metrics = run_engram()
 
     print("\n  baseline (serial)   : %6.0f ms   think -> call -> wait, repeated"
           % (baseline * 1000))
-    print("  precog (speculative): %6.0f ms   calls prefetched during the think"
-          % (precog_elapsed * 1000))
-    if precog_elapsed > 0:
-        print("\n  speedup             : %.2fx  end-to-end" % (baseline / precog_elapsed))
+    print("  engram (speculative): %6.0f ms   calls prefetched during the think"
+          % (engram_elapsed * 1000))
+    if engram_elapsed > 0:
+        print("\n  speedup             : %.2fx  end-to-end" % (baseline / engram_elapsed))
     print("  hit rate            : %.0f%%   (%d/%d real calls served warm)"
           % (metrics["hit_rate"] * 100,
              metrics["warm_hits"] + metrics["late_hits"], metrics["real_calls"]))
@@ -180,7 +180,7 @@ def main():
 
     _hr("Race 3 — a misprediction is squashed at no correctness cost")
     text, sq = run_squash()
-    print("\n  Narrated 'orders for alice' (precog prefetched get_orders),")
+    print("\n  Narrated 'orders for alice' (engram prefetched get_orders),")
     print("  but the agent actually called get_customer(bob). The wrong guess")
     print("  is squashed; the agent still gets the correct answer:")
     print("\n    result: %s" % text)
@@ -188,7 +188,7 @@ def main():
           % (sq["wrong_speculations"], _precision(sq) * 100))
     print("  A miss costs a wasted read-only fetch, never a wrong answer.")
 
-    _hr("Safety — Precog never speculates a side-effecting tool")
+    _hr("Safety — Engram never speculates a side-effecting tool")
     print("  send_email is annotated readOnlyHint=false, so it is excluded from")
     print("  speculation by construction. Try it: a wrong guess can never send one.")
     print()

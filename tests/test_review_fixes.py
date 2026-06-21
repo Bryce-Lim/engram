@@ -8,14 +8,14 @@ import threading
 import time
 import unittest
 
-from precog import jsonrpc
-from precog.cache import SpeculationCache, canonical_signature
-from precog.config import ConfigError, load_intent_rules
-from precog.metrics import Metrics
-from precog.predictors.base import Prediction
-from precog.predictors.markov import MarkovModel
-from precog.safety import ToolRegistry
-from precog.speculator import Speculator
+from engram import jsonrpc
+from engram.cache import SpeculationCache, canonical_signature
+from engram.config import ConfigError, load_intent_rules
+from engram.metrics import Metrics
+from engram.predictors.base import Prediction
+from engram.predictors.markov import MarkovModel
+from engram.safety import ToolRegistry
+from engram.speculator import Speculator
 
 
 def build(dispatch, registry=None, warm_ttl=30.0, max_workers=4):
@@ -159,7 +159,7 @@ class _BlockStream:
 
 class TestBoundedLines(unittest.TestCase):
     def _frame(self, blocks, cap=1024):
-        from precog.downstream import DownstreamClient
+        from engram.downstream import DownstreamClient
         c = DownstreamClient(["true"], max_line_bytes=cap)
         return list(c._bounded_lines(_BlockStream(blocks)))
 

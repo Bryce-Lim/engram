@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Launch the Precog web UI: builds the frontend if needed, then serves it
+# Launch the Engram web UI: builds the frontend if needed, then serves it
 # together with the live comparison API from one Python process.
 #
 #   ./web/run_web.sh [PORT]

@@ -1,4 +1,4 @@
-# Precog — Demo Runbook
+# Engram — Demo Runbook
 
 Everything you need to run the demo tomorrow morning. Follow it top to bottom.
 
@@ -7,7 +7,7 @@ Everything you need to run the demo tomorrow morning. Follow it top to bottom.
 ## 0. Preflight (do this first, ~15 seconds)
 
 ```bash
-cd /local/home/danilief/precog
+cd /local/home/danilief/engram
 python3 web/preflight.py
 ```
 
@@ -28,7 +28,7 @@ Liveness check any time: `curl -s http://127.0.0.1:8765/api/health`
 ## 1. The 60-second story
 
 > "Agents are slow because they wait — the model thinks for seconds, fires a
-> tool call, blocks on the network, repeats. Precog is a drop-in MCP proxy that
+> tool call, blocks on the network, repeats. Engram is a drop-in MCP proxy that
 > predicts the agent's next calls *while it's still thinking*, fires the safe
 > ones in parallel, and serves them warm the instant the model asks. Branch
 > prediction, for agents."
@@ -46,14 +46,14 @@ check ORD-1001 payment and shipping, review system health and logs, then email
 Alice a resolution.
 ```
 ~14 calls, typically **3–4× faster**. Point out: the cyan sparks firing during
-the "think", Precog finishing while the baseline is still on call #3.
+the "think", Engram finishing while the baseline is still on call #3.
 
 **B. The safety gate (the trust moment):**
 ```
 Issue a refund for ORD-1001 for Alice, cancel order 5512, and email her.
 ```
 Point out the per-call list: `issue_refund`, `cancel_order`, `send_email` are
-marked **"side-effecting — never speculated by design"** and ran fresh. Precog
+marked **"side-effecting — never speculated by design"** and ran fresh. Engram
 *cannot* fire a money-moving call on a guess.
 
 **C. Cross-run learning (run the SAME prompt twice):**

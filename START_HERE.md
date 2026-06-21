@@ -1,6 +1,6 @@
-# Precog — start here
+# Engram — start here
 
-**Speculative execution for AI agents.** Precog is a drop-in proxy for the Model
+**Speculative execution for AI agents.** Engram is a drop-in proxy for the Model
 Context Protocol (MCP): it predicts an agent's next tool calls *while the model
 is still thinking*, runs the safe ones in parallel, and serves the results the
 instant the model asks. Branch prediction, for agents.
@@ -14,14 +14,14 @@ font).
 ## Run the demo (30 seconds)
 
 ```bash
-# unpack, then from inside the precog/ folder:
+# unpack, then from inside the engram/ folder:
 python3 web/server.py --port 8765
 ```
 
 Open **http://127.0.0.1:8765** in your browser.
 
 Type what an agent should do (or click an example), hit **Run the race**, and
-watch the same plan run twice — once plain, once through Precog — as two
+watch the same plan run twice — once plain, once through Engram — as two
 liquid-glass bars fill in real time. Everything on screen is measured live.
 
 Try this prompt for the most dramatic result:
@@ -34,14 +34,14 @@ Try this prompt for the most dramatic result:
 
 ## What you're looking at
 
-- **With Precog** (orange) fills almost instantly — the calls were prefetched
+- **With Engram** (orange) fills almost instantly — the calls were prefetched
   during the model's "think".
-- **Without Precog** (white) fills one call at a time, each waiting on the
+- **Without Engram** (white) fills one call at a time, each waiting on the
   network.
 - **Safety:** anything side-effecting (send email, issue refund) is *never*
   speculated — look for "side-effecting — never speculated by design" in the
   per-call list.
-- **It learns:** run the same prompt twice and Precog recognizes the pattern.
+- **It learns:** run the same prompt twice and Engram recognizes the pattern.
 
 ### Honest disclosure
 The proxy, the MCP protocol over a real server subprocess, the speculation
@@ -65,7 +65,7 @@ python3 -m unittest discover -s tests     # 83 engine tests (pure stdlib)
 Wrap a real MCP server (the actual product):
 
 ```bash
-bin/precog wrap -- ./your-mcp-server --args
+bin/engram wrap -- ./your-mcp-server --args
 ```
 
 ---
@@ -89,7 +89,7 @@ package to keep it small.)
 ## What's in here
 
 - `web/`        — the demo: Python server + the prebuilt UI in `web/static/`
-- `precog/`     — the proxy engine (the actual product)
+- `engram/`     — the proxy engine (the actual product)
 - `demo/`       — mock MCP server, scripted agent, terminal demo
 - `tests/`      — 83 tests
 - `README.md`         — full project documentation

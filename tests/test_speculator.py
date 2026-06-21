@@ -2,11 +2,11 @@ import threading
 import time
 import unittest
 
-from precog.cache import SpeculationCache
-from precog.metrics import Metrics
-from precog.predictors.base import Prediction
-from precog.safety import ToolRegistry
-from precog.speculator import Speculator
+from engram.cache import SpeculationCache
+from engram.metrics import Metrics
+from engram.predictors.base import Prediction
+from engram.safety import ToolRegistry
+from engram.speculator import Speculator
 
 
 def build(dispatch, max_workers=8):

@@ -19,7 +19,7 @@ which supplies arguments from intent.
 import threading
 from typing import Any, Dict, List, Optional
 
-from precog.predictors.base import Prediction, Predictor
+from engram.predictors.base import Prediction, Predictor
 
 
 class MarkovModel(Predictor):

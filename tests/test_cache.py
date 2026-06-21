@@ -1,7 +1,7 @@
 import threading
 import unittest
 
-from precog.cache import SpeculationCache, canonical_signature
+from engram.cache import SpeculationCache, canonical_signature
 
 
 class TestCanonicalSignature(unittest.TestCase):

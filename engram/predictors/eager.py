@@ -1,7 +1,7 @@
 """Signal 1 — eager dispatch (zero guessing).
 
-When a host knows a fully-formed tool call is imminent, it can tell Precog via
-the ``notifications/precog/tool_intent`` hint channel *before* it formally
+When a host knows a fully-formed tool call is imminent, it can tell Engram via
+the ``notifications/engram/tool_intent`` hint channel *before* it formally
 emits the ``tools/call`` request. Eager dispatch turns that intent into a
 maximum-confidence prediction so the call begins executing immediately instead
 of after the request is serialized and routed — and when a turn carries several
@@ -22,7 +22,7 @@ Markov signal and protocol-safe concurrency.
 
 from typing import Any, Dict, List
 
-from precog.predictors.base import Prediction, Predictor
+from engram.predictors.base import Prediction, Predictor
 
 
 class EagerDispatch(Predictor):

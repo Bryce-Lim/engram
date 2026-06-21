@@ -1,12 +1,12 @@
-"""``precog`` command-line interface.
+"""``engram`` command-line interface.
 
 Usage::
 
-    precog wrap [options] -- <server-command> [args...]
-    precog wrap ./your-mcp-server
+    engram wrap [options] -- <server-command> [args...]
+    engram wrap ./your-mcp-server
 
 ``wrap`` launches ``<server-command>`` as the downstream MCP server and serves
-the Precog proxy on this process's stdio. Point your agent/host at ``precog``
+the Engram proxy on this process's stdio. Point your agent/host at ``engram``
 instead of the server and you get speculative execution with zero changes to
 the agent. Logs go to stderr (stdout is reserved for the MCP byte stream).
 """
@@ -15,18 +15,18 @@ import argparse
 import sys
 from typing import List, Optional
 
-from precog import __version__
-from precog.proxy import Precog
+from engram import __version__
+from engram.proxy import Engram
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="precog",
+        prog="engram",
         description="Speculative execution for AI agents — a performance layer for MCP.")
-    parser.add_argument("--version", action="version", version="precog " + __version__)
+    parser.add_argument("--version", action="version", version="engram " + __version__)
     sub = parser.add_subparsers(dest="command")
 
-    wrap = sub.add_parser("wrap", help="wrap an MCP server with the Precog proxy")
+    wrap = sub.add_parser("wrap", help="wrap an MCP server with the Engram proxy")
     wrap.add_argument("--quiet", action="store_true", help="suppress stderr logging")
     wrap.add_argument("--no-cot", action="store_true",
                       help="disable the chain-of-thought oracle")
@@ -61,26 +61,26 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     server_cmd = _normalize_server_command(args.server)
     if not server_cmd:
-        print("precog wrap: missing server command\n", file=sys.stderr)
+        print("engram wrap: missing server command\n", file=sys.stderr)
         parser.parse_args(["wrap", "--help"])
         return 2
 
     def log(message: str) -> None:
         if not args.quiet:
-            sys.stderr.write("[precog] " + message + "\n")
+            sys.stderr.write("[engram] " + message + "\n")
             sys.stderr.flush()
 
     intent_rules = None
     if args.rules:
-        from precog.config import ConfigError, load_intent_rules
+        from engram.config import ConfigError, load_intent_rules
         try:
             intent_rules = load_intent_rules(args.rules)
         except ConfigError as exc:
-            print("precog wrap: %s" % exc, file=sys.stderr)
+            print("engram wrap: %s" % exc, file=sys.stderr)
             return 2
         log("loaded %d intent rule(s) from %s" % (len(intent_rules), args.rules))
 
-    proxy = Precog(
+    proxy = Engram(
         downstream_command=server_cmd,
         enable_cot=not args.no_cot,
         enable_markov=not args.no_markov,
