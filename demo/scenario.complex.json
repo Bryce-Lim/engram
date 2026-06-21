@@ -1,0 +1,25 @@
+{
+  "reasoning": "Big escalation to work through. Let me lay out the whole plan before I start. First I'll search for anything matching the keyword refund to scope the issue. Then I need the recent orders for alice, the orders for bob, and the orders for carol since all three are on the ticket. I'll pull the customer profile for alice and the profile for bob to check their tiers. The disputed charges are on a few orders, so I'll fetch the invoice for ORD-1001, the invoice for ORD-1002, and the invoice for ORD-2050. While that's going I also want a read on system health: let me check the current pipeline status and the dashboard metrics and any active alerts. After I've reviewed everything I'll decide whether to send an email to the customer with a resolution.",
+  "rules": [
+    {"pattern": "search for (?:anything matching the keyword )?(?P<query>\\w+)", "tool": "search", "args": {"query": "query"}, "flags": "i"},
+    {"pattern": "orders for (?P<customer>\\w+)", "tool": "get_orders", "args": {"customer": "customer"}, "flags": "i"},
+    {"pattern": "profile for (?P<customer>\\w+)", "tool": "get_customer", "args": {"customer": "customer"}, "flags": "i"},
+    {"pattern": "invoice for (?P<order_id>[\\w-]+)", "tool": "fetch_invoice", "args": {"order_id": "order_id"}, "flags": "i"}
+  ],
+  "calls": [
+    {"name": "search", "arguments": {"query": "refund"}},
+    {"name": "get_orders", "arguments": {"customer": "alice"}},
+    {"name": "get_orders", "arguments": {"customer": "bob"}},
+    {"name": "get_orders", "arguments": {"customer": "carol"}},
+    {"name": "get_customer", "arguments": {"customer": "alice"}},
+    {"name": "get_customer", "arguments": {"customer": "bob"}},
+    {"name": "fetch_invoice", "arguments": {"order_id": "ORD-1001"}},
+    {"name": "fetch_invoice", "arguments": {"order_id": "ORD-1002"}},
+    {"name": "fetch_invoice", "arguments": {"order_id": "ORD-2050"}},
+    {"name": "get_status", "arguments": {}},
+    {"name": "get_metrics", "arguments": {}},
+    {"name": "get_alerts", "arguments": {}},
+    {"name": "get_customer", "arguments": {"customer": "carol"}},
+    {"name": "send_email", "arguments": {"to": "alice@example.com", "body": "Your refund is approved."}}
+  ]
+}

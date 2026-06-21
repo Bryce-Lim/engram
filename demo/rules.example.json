@@ -1,0 +1,25 @@
+{
+  "intent_rules": [
+    {
+      "pattern": "orders for (?P<customer>\\w+)",
+      "tool": "get_orders",
+      "args": {"customer": "customer"},
+      "confidence": 0.95,
+      "flags": "i"
+    },
+    {
+      "pattern": "profile for (?P<customer>\\w+)",
+      "tool": "get_customer",
+      "args": {"customer": "customer"},
+      "confidence": 0.95,
+      "flags": "i"
+    },
+    {
+      "pattern": "invoice for (?P<order_id>[\\w-]+)",
+      "tool": "fetch_invoice",
+      "args": {"order_id": "order_id"},
+      "confidence": 0.95,
+      "flags": "i"
+    }
+  ]
+}

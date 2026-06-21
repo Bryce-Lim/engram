@@ -1,0 +1,13 @@
+{
+  "reasoning": "To answer this I need a few things. I'll pull the recent orders for alice, then get the customer profile for alice, and finally fetch the invoice for ORD-1001.",
+  "rules": [
+    {"pattern": "orders for (?P<customer>\\w+)", "tool": "get_orders", "args": {"customer": "customer"}, "flags": "i"},
+    {"pattern": "profile for (?P<customer>\\w+)", "tool": "get_customer", "args": {"customer": "customer"}, "flags": "i"},
+    {"pattern": "invoice for (?P<order_id>[\\w-]+)", "tool": "fetch_invoice", "args": {"order_id": "order_id"}, "flags": "i"}
+  ],
+  "calls": [
+    {"name": "get_orders", "arguments": {"customer": "alice"}},
+    {"name": "get_customer", "arguments": {"customer": "alice"}},
+    {"name": "fetch_invoice", "arguments": {"order_id": "ORD-1001"}}
+  ]
+}
